@@ -1,0 +1,7 @@
+[core]
+    remote = minio
+['remote "minio"']
+    url = s3://dvcstorage
+    endpointurl = my-storage-url
+    secret_access_key = my-key
+    access_key_id = my-id
