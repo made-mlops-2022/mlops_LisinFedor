@@ -31,12 +31,15 @@ setuptools.setup(
         "numpy",
         "scikit-learn",
         "pandas",
+        "dvc[s3]",
     ],
     extras_require={
         "dev": [
             "wemake-python-styleguide",
             "mypy",
             "black",
+            "jupyterlab",
+            "seaborn",
         ],
         "tests": [
             "pytest",
