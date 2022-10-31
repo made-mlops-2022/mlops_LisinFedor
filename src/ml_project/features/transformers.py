@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 DataT = Union[pd.DataFrame, np.ndarray]
 
@@ -27,6 +27,10 @@ class CatTransformer(BaseEstimator, TransformerMixin):
         Args:
             max_cat_num (int): max number of unique elements.
         """
+        logger.info(
+            "Feature is categorical if number of unique vals is %d.",  # noqa: WPS323
+            max_cat_num,
+        )
         self.max_cat_num = max_cat_num
         self._cat_feat_names: List[str] = []
         self._enc_feat_names: List[str] = []
@@ -126,13 +130,99 @@ class CatTransformer(BaseEstimator, TransformerMixin):
     def _check_transformation(self, trans_data: DataT) -> DataT:
         if self._ohe is not None:
             if trans_data.shape[0] != self._enc_num_id:
-                log.warning(
+                logger.warning(
                     "Number of columns in your input after transformation less,"
                     "then number of columns in fitted data after transformation",
                 )
         elif isinstance(trans_data, pd.DataFrame):
 
             if self._enc_feat_names != trans_data.columns.to_list():
+                old_cols = str(self._enc_feat_names)
+                cols = str(trans_data.columns.to_list())
+                logger.warning("Number of columns after conversion does not match.")
+                logger.warning("Expected columns: %s", old_cols)  # noqa: WPS323
+                logger.warning("Founded: %s", cols)  # noqa: WPS323
+                logger.warning("Missing columns added and filled with 0.")
                 trans_data = trans_data.reindex(columns=self._enc_feat_names).fillna(0)
 
         return trans_data
+
+
+class ScalerTransformer(BaseEstimator, TransformerMixin):
+    """Transform numeric features unsing scaler."""
+
+    def __init__(self, scaler: TransformerMixin, min_numeric: int) -> None:
+        """Init transformer.
+
+        Args:
+            scaler (TransformerMixin): scaler for scaling features.
+            min_numeric (int): min number if unique values.
+                If feature has more uniq values than min_numeric,
+                this feature will be rescaled.
+        """
+        self.scaler = scaler
+        self.min_numeric = min_numeric
+        self._cols: List[Union[str, int]] = []
+        self._transformer: Optional[ColumnTransformer] = None
+        super().__init__()
+
+    def fit(self, x_data: DataT, *args) -> ScalerTransformer:
+        self._find_numeric(x_data)
+        self._transformer = ColumnTransformer(
+            transformers=[
+                ("scaler", self.scaler, self._cols),
+            ],
+        )
+        self._transformer.fit(x_data)
+
+        return self
+
+    def transform(self, x_data: DataT, *args) -> DataT:
+        if self._transformer is None:
+            raise AttributeError("You need to fit transformer first.")
+        scaled_cols = self._transformer.transform(x_data)
+        if isinstance(x_data, pd.DataFrame):
+            x_data[self._cols] = scaled_cols
+        elif isinstance(x_data, np.ndarray):
+            x_data = x_data.astype("float")
+            x_data[:, self._cols] = scaled_cols
+        else:
+            raise TypeError(
+                "`x_data` can be pandas DataFrame or Numpy, not {tp}".format(
+                    tp=type(x_data),
+                ),
+            )
+        return x_data
+
+    def _find_numeric(self, df: DataT):
+        if isinstance(df, pd.DataFrame):
+            self._find_numeric_pd(df)
+        elif isinstance(df, np.ndarray):
+            self._find_numeric_np(df)
+        else:
+            raise TypeError(
+                "`x_data` can be pandas DataFrame or Numpy, not {tp}".format(
+                    tp=type(df),
+                ),
+            )
+
+    def _find_numeric_pd(self, df: pd.DataFrame):
+        for col in df.columns:
+            uniqs_num = len(df[col].unique())
+            if pd.api.types.is_numeric_dtype(df[col].dtype):
+                if uniqs_num > self.min_numeric:
+                    self._cols.append(col)
+            else:
+                logger.warning(
+                    "Skip column %s. Not a numeric type.",  # noqa: WPS323
+                    str(col),
+                )
+
+    def _find_numeric_np(self, df: np.ndarray):
+        for col_i in range(df.shape[1]):
+            uniqs_num = len(np.unique(df[:, col_i]))
+            if pd.api.types.is_numeric_dtype(df[:, col_i]):
+                if uniqs_num > self.min_numeric:
+                    self._cols.append(col_i)
+            else:
+                raise ValueError("All values in np.array mast be numeric")
