@@ -32,6 +32,8 @@ setuptools.setup(
         "scikit-learn",
         "pandas",
         "dvc[s3]",
+        "marshmallow_dataclass",
+        "mlflow",
     ],
     extras_require={
         "dev": [
