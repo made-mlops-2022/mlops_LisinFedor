@@ -26,8 +26,6 @@ def train_pipeline(config_path: Union[str, Path]):
         mlflow.set_experiment(config_params.mlflow_exp)
 
         with mlflow.start_run(run_name=config_params.expname) as run:
-            print(run.info.run_id)
-            return
             mlflow.log_artifact(local_path=config_path)
             model_name, metrics, pipe = run_train_pipeline(config_params)
             mlflow.log_metrics(metrics.get("macro avg"))
