@@ -1,3 +1,4 @@
+from http import client
 import logging
 import pickle
 import numpy as np
@@ -81,10 +82,10 @@ def _load_mlflow_model_from_artifacts(path: str):
     return load_local_model(tmp_model_path, is_path=True)
 
 
-def load_nonlocal_model(path: str):
-    if "runs" in path:
+def load_nonlocal_model(path: str, is_dir: bool):
+    if is_dir:
         model = _load_mlflow_sklearn_model(path)
-    elif "artifacts" in path:
+    else:
         model = _load_mlflow_model_from_artifacts(path)
     return model
 
@@ -95,3 +96,23 @@ def get_mlflow_model_artifact_path(model_name: str, run_id: str):
 
 def get_mlflow_model_runs_path(model_name: str, run_id: str):
     return "runs:/{id}/{name}".format(id=run_id, name=model_name)
+
+
+def get_model_mlflow_path_by_id(uri: str, model_id: str):
+    mlflow.set_registry_uri(uri)
+    client = mlflow.tracking.MlflowClient()
+    client_info = client.list_artifacts(model_id)
+
+    for file_info in client_info:
+        if ".yml" in file_info.path:
+            continue
+        elif file_info.is_dir:
+            return get_mlflow_model_runs_path(
+                file_info.path,
+                model_id,
+            )
+        else:
+            return get_mlflow_model_artifact_path(
+                file_info.path,
+                model_id,
+            )
