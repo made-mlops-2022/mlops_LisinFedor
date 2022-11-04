@@ -17,7 +17,7 @@ def load_and_predict(
     data_path: Union[Path, str],
     out_csv_file_path: Union[Path, str],
     model_id: str = "last",
-    model_path: Optional[str] = None,
+    model_path: Optional[Union[Path, str]] = None,
 ) -> None:
 
     config_path = CONFIG_PATH / "config.yml"
@@ -31,12 +31,14 @@ def load_and_predict(
 
     if model_id == "last":
         model = load_last_model(config_params)
-    else:
+    elif config_params.mlflow_url is not None:
         model_path, is_dir = model_fit_predict.get_model_mlflow_path_by_id(
             config_params.mlflow_url,
             model_id,
         )
         model = model_fit_predict.load_nonlocal_model(model_path, is_dir)
+    else:
+        raise mlflow.exceptions.MlflowException("Cant find MLFLOW_URI in environments.")
 
     return predict(model, data_path, out_csv_file_path)
 
@@ -88,5 +90,9 @@ def load_last_model(config_params: train_params.TrainigParams):
 
 
 if __name__ == "__main__":
-    path = RAW_DATA_PATH / "data.csv"
-    load_and_predict(data_path=path, out_csv_file_path="preds.csv")
+    path = RAW_DATA_PATH / "heart_cleveland_upload.csv"
+    load_and_predict(
+        data_path=path,
+        out_csv_file_path="preds.csv",
+        model_id="5bc0d340c40444fa95ed74ec2a9d82ac",
+    )
