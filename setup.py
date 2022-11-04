@@ -50,4 +50,9 @@ setuptools.setup(
             "pytest-dotenv",
         ],
     },
+    entry_points={
+        'console_scripts': [
+            'classification = ml_project.__main__:main',
+        ],
+    },
 )
