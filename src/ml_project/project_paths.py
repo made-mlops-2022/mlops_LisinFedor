@@ -4,7 +4,7 @@ PROJECT_PATH = Path(__file__).parent
 
 CONFIG_PATH = PROJECT_PATH / "configs"
 MODEL_CONFIGS_PATH = CONFIG_PATH / "model_configs"
-TRAINED_PATH = PROJECT_PATH / "models/trained"
+TRAINED_PATH = PROJECT_PATH / "models" / "trained"
 Path(MODEL_CONFIGS_PATH).mkdir(parents=True, exist_ok=True)
 Path(TRAINED_PATH).mkdir(parents=True, exist_ok=True)
 
