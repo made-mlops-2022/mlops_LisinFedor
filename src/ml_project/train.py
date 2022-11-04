@@ -6,7 +6,11 @@ from pathlib import Path
 from sklearn.pipeline import Pipeline
 from dotenv import load_dotenv
 
-from ml_project.enities.train_params import read_train_params, TrainigParams
+from ml_project.enities.train_params import (
+    read_train_params,
+    TrainigParams,
+    dump_train_params,
+)
 from ml_project.data import make_dataset
 from ml_project.features import build_features
 from ml_project.models import model_fit_predict
@@ -33,10 +37,17 @@ def train_pipeline(config_path: Union[str, Path]):
 
             if config_params.model.module == "sklearn":
                 model_info = mlflow.sklearn.log_model(pipe, model_name)
-                logger.info(f"Model info: {model_info}")
-                print(f">>>>>>>>>>>>>>>>>>>>>\n>>Model info: {model_info.model_uri}")
+                logger.info(f"Model info: {model_info.model_uri}")
+                config_params.model.last_model = model_info.model_uri
             else:
                 mlflow.log_artifact(TRAINED_PATH / model_name)
+                model_path = model_fit_predict.get_mlflow_model_artifact_path(
+                    model_name, run.info.run_id,
+                )
+                config_params.model.last_model = model_path
+
+        dump_train_params(config_params, config_path)
+
     else:
         return run_train_pipeline(config_params)
 
@@ -53,6 +64,7 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
             logger.info("Trying to load data from s3 using credetials from `.env`.")
 
             make_dataset.download_data_from_s3(train_params.s3)
+            logger.info("Data loaded.")
 
     df = make_dataset.read_data(raw_data)
     train, test = make_dataset.split_train_test_data(df, train_params.splitting)
@@ -72,7 +84,7 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
         pipe = Pipeline(steps=[])
 
     model = model_fit_predict.train_model(
-        feats=train_features, target=train_target, train_params=train_params.model
+        feats=train_features, target=train_target, train_params=train_params.model,
     )
 
     pipe.steps.append(
@@ -84,7 +96,9 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
 
     preds = model_fit_predict.predict_model(pipe, test)
     metrics = model_fit_predict.evaluate_model(
-        preds, test_target, odct=train_params.use_mlflow,
+        preds,
+        test_target,
+        odct=train_params.use_mlflow,
     )
 
     model_name = f"{train_params.model.model_name}_{train_params.expname}"
@@ -95,5 +109,4 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
 
 if __name__ == "__main__":
     config_path = CONFIG_PATH / "config.yml"
-    _, m, _ = train_pipeline(config_path)
-    print(m)
+    train_pipeline(config_path)
