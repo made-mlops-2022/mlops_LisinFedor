@@ -21,8 +21,8 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-def train_pipeline(config_path: Union[str, Path]):
-    config_params = read_train_params(config_path)
+def train_pipeline():
+    config_params = read_train_params(CONFIG_PATH)
 
     if config_params.use_mlflow:
 
@@ -30,7 +30,7 @@ def train_pipeline(config_path: Union[str, Path]):
         mlflow.set_experiment(config_params.mlflow_exp)
 
         with mlflow.start_run(run_name=config_params.expname) as run:
-            mlflow.log_artifact(local_path=config_path)
+            mlflow.log_artifact(local_path=CONFIG_PATH)
             model_name, metrics, pipe = run_train_pipeline(config_params)
             mlflow.log_metrics(metrics.get("macro avg"))
             mlflow.log_metric("accuracy", metrics.get("accuracy"))
@@ -46,10 +46,10 @@ def train_pipeline(config_path: Union[str, Path]):
                 )
                 config_params.model.last_model = model_path
 
-        dump_train_params(config_params, config_path)
+        dump_train_params(config_params, CONFIG_PATH)
 
     else:
-        return run_train_pipeline(config_params)
+        run_train_pipeline(config_params)
 
 
 def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]:
@@ -105,8 +105,3 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
     model_fit_predict.serialize_pipline(pipe, model_name)
 
     return model_name, metrics, pipe
-
-
-if __name__ == "__main__":
-    config_path = CONFIG_PATH / "config.yml"
-    train_pipeline(config_path)
