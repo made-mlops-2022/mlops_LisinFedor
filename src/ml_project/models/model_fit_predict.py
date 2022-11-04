@@ -5,11 +5,12 @@ import pandas as pd
 import mlflow
 
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Union, Optional
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 
 from ml_project.enities import model_params
+from ml_project.project_paths import TRAINED_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def evaluate_model(
 
 
 def serialize_pipline(model: object, file_name: str):
-    path = Path(__file__).parent / "trained" / file_name
+    path = TRAINED_PATH / file_name
 
     with open(path, "wb") as model_file:
         pickle.dump(model, model_file)
@@ -97,7 +98,8 @@ def get_mlflow_model_runs_path(model_name: str, run_id: str):
     return "runs:/{id}/{name}".format(id=run_id, name=model_name)
 
 
-def get_model_mlflow_by_id(uri: str, model_id: str) -> Tuple[str, bool]:
+def get_model_mlflow_path_by_id(uri: str, model_id: str) -> Tuple[str, bool]:
+    mlflow.tracking.set_tracking_uri(uri)
     client = mlflow.tracking.MlflowClient(uri)
     client_info = client.list_artifacts(model_id)
 
