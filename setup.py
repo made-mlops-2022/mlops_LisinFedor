@@ -42,8 +42,10 @@ setuptools.setup(
             "black",
             "jupyterlab",
             "seaborn",
+            "types-PyYAML",
         ],
         "tests": [
+            "sdv",
             "pytest",
             "pytest-dotenv",
         ],
