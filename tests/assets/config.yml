@@ -1,0 +1,27 @@
+data_path: null
+expname: test
+features:
+  categorical_features_max_uniqs: 5
+  create_dummy: true
+  features_to_drop: null
+  numeric_features_min_uniqs: 5
+  scaler: MinMaxScaler
+  target_col: condition
+  use_scaler: false
+mlflow_exp: mlops
+mlflow_url: null
+model:
+  kwargs_path: null
+  last_model: runs:/f15d692a80b54c2fb6fab0cf9f55043b/RandomForestClassifier_experiment1
+  model_name: RandomForestClassifier
+  module: sklearn
+  submodule: ensemble
+s3:
+  bucket: dvcstorage
+  defaultfile: heart_cleveland_upload.csv
+  defaultout: tests/assets
+  path: untracked
+splitting:
+  random_state: 42
+  val_size: 0.3
+use_mlflow: false
