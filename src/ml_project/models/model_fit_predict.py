@@ -1,4 +1,3 @@
-from http import client
 import logging
 import pickle
 import numpy as np
@@ -6,7 +5,7 @@ import pandas as pd
 import mlflow
 
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 
@@ -42,7 +41,7 @@ def evaluate_model(
     predicts: np.ndarray,
     target: pd.Series,
     odct: bool = True,
-) -> Dict[str, Any]:
+) -> Union[Dict[str, Any], str]:
     return classification_report(target, predicts, output_dict=odct)
 
 
@@ -55,7 +54,7 @@ def serialize_pipline(model: object, file_name: str):
     logger.info("Save model: %s", str(path))
 
 
-def load_local_model(file_name_or_path: str, is_path: bool = False):
+def load_local_model(file_name_or_path: Union[Path, str], is_path: bool = False):
     path: Union[Path, str] = ""
 
     if is_path:
@@ -98,21 +97,25 @@ def get_mlflow_model_runs_path(model_name: str, run_id: str):
     return "runs:/{id}/{name}".format(id=run_id, name=model_name)
 
 
-def get_model_mlflow_path_by_id(uri: str, model_id: str):
-    mlflow.set_registry_uri(uri)
-    client = mlflow.tracking.MlflowClient()
+def get_model_mlflow_by_id(uri: str, model_id: str) -> Tuple[str, bool]:
+    client = mlflow.tracking.MlflowClient(uri)
     client_info = client.list_artifacts(model_id)
 
     for file_info in client_info:
         if ".yml" in file_info.path:
             continue
         elif file_info.is_dir:
-            return get_mlflow_model_runs_path(
+            return (
+                get_mlflow_model_runs_path(
+                    file_info.path,
+                    model_id,
+                ),
+                True,
+            )
+        return (
+            get_mlflow_model_artifact_path(
                 file_info.path,
                 model_id,
-            )
-        else:
-            return get_mlflow_model_artifact_path(
-                file_info.path,
-                model_id,
-            )
+            ),
+            False,
+        )
