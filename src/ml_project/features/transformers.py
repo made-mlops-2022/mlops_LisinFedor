@@ -44,6 +44,7 @@ class CatTransformer(BaseEstimator, TransformerMixin):
 
         Args:
             x_data (DataT): numpy or pandas data. Must not contain a target.
+            *args: args.
 
         Returns:
             CatTransformer: fitted transformer.
