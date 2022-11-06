@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas as pd
+import json
 from typing import Tuple
 from pathlib import Path
 from ml_project.models import model_fit_predict as mfp
@@ -18,10 +19,10 @@ def test_predict_with_model_id(model_id, synt_data_target, mlflow_uri):
     model = mfp.load_nonlocal_model(path, is_dir=is_dir)
     prediction = mfp.predict_model(model, sdata)
 
-    cls_rep = mfp.evaluate_model(prediction, starget, odct=False)
-
+    cls_rep = mfp.evaluate_model(prediction, starget)
+    str_rep = json.dumps(cls_rep, indent=4)
     sys.stdout.write("\n")
-    sys.stdout.write(cls_rep)
+    sys.stdout.write(str_rep)
 
 
 def test_predict_with_artifact_id(artifact_id, synt_data_target, mlflow_uri):
@@ -35,10 +36,10 @@ def test_predict_with_artifact_id(artifact_id, synt_data_target, mlflow_uri):
     model = mfp.load_nonlocal_model(path, is_dir=is_dir)
     prediction = mfp.predict_model(model, sdata)
 
-    cls_rep = mfp.evaluate_model(prediction, starget, odct=False)
-
+    cls_rep = mfp.evaluate_model(prediction, starget)
+    str_rep = json.dumps(cls_rep, indent=4)
     sys.stdout.write("\n")
-    sys.stdout.write(cls_rep)
+    sys.stdout.write(str_rep)
 
 
 def test_load_predict_last(

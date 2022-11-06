@@ -5,7 +5,7 @@ import pandas as pd
 import mlflow
 
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union, Optional
+from typing import Any, Dict, Tuple, Union
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 
@@ -41,9 +41,8 @@ def predict_model(model: Pipeline, features: pd.DataFrame) -> np.ndarray:
 def evaluate_model(
     predicts: np.ndarray,
     target: pd.Series,
-    odct: bool = True,
 ) -> Union[Dict[str, Any], str]:
-    return classification_report(target, predicts, output_dict=odct)
+    return classification_report(target, predicts, output_dict=True)
 
 
 def serialize_pipline(model: object, file_name: str):
