@@ -7,16 +7,16 @@ features:
   numeric_features_min_uniqs: 5
   scaler: MinMaxScaler
   target_col: condition
-  use_scaler: false
+  use_scaler: true
 mlflow_exp: mlops
 mlflow_url: null
 model:
-  save_as: null
   kwargs_path: null
-  last_model: runs:/5bc0d340c40444fa95ed74ec2a9d82ac/GradientBoostingClassifier_experiment11
-  model_name: GradientBoostingClassifier
+  last_model: runs:/e3fa174b828842bba47c688e584c4402/LogisticRegression_experiment
+  model_name: LogisticRegression
   module: sklearn
-  submodule: ensemble
+  save_as: null
+  submodule: linear_model
 s3:
   bucket: dvcstorage
   defaultfile: heart_cleveland_upload.csv
