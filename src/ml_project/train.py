@@ -1,8 +1,8 @@
 import logging
 import os
 import mlflow
-from typing import Any, Tuple, Union
-from pathlib import Path
+import json
+from typing import Any, Tuple, Optional
 from sklearn.pipeline import Pipeline
 from dotenv import load_dotenv
 
@@ -14,17 +14,23 @@ from ml_project.enities.train_params import (
 from ml_project.data import make_dataset
 from ml_project.features import build_features
 from ml_project.models import model_fit_predict
-from ml_project.project_paths import CONFIG_PATH, TRAINED_PATH
+from ml_project.project_paths import CONFIG_PATH, TRAINED_PATH, INTERIM_DATA_PATH
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
-def train_pipeline():
-    config_params = read_train_params(CONFIG_PATH)
+def train_pipeline(use_mlflow: Optional[bool] = None, save_as: Optional[str] = None):
+    config_params = read_train_params(CONFIG_PATH / "config.yml")
 
-    if config_params.use_mlflow:
+    if save_as is not None:
+        config_params.model.save_as = save_as
+
+    if use_mlflow is None:
+        use_mlflow = config_params.use_mlflow
+
+    if use_mlflow:
 
         mlflow.set_tracking_uri(config_params.mlflow_url)
         mlflow.set_experiment(config_params.mlflow_exp)
@@ -46,10 +52,14 @@ def train_pipeline():
                 )
                 config_params.model.last_model = model_path
 
-        dump_train_params(config_params, CONFIG_PATH)
+        dump_train_params(config_params, CONFIG_PATH / "config.yml")
 
     else:
-        run_train_pipeline(config_params)
+        _, metrics, _ = run_train_pipeline(config_params)
+        metrics_name = "last_metrics.json"
+
+        with open(TRAINED_PATH / metrics_name, "w") as metricfile:
+            json.dump(metrics, metricfile, indent=4)
 
 
 def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]:
@@ -75,6 +85,9 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
     train = train.drop(train_params.features.target_col, axis=1)
     test = test.drop(train_params.features.target_col, axis=1)
 
+    test_target.to_csv(INTERIM_DATA_PATH / "test_target.csv", index=False)
+    test.to_csv(INTERIM_DATA_PATH / "test.csv", index=False)
+
     pipe = build_features.build_data_preproc_pipline(train_params.features)
 
     if pipe is not None:
@@ -98,10 +111,9 @@ def run_train_pipeline(train_params: TrainigParams) -> Tuple[str, Any, Pipeline]
     metrics = model_fit_predict.evaluate_model(
         preds,
         test_target,
-        odct=train_params.use_mlflow,
-    )
-
-    model_name = f"{train_params.model.model_name}_{train_params.expname}"
+    )  
+    model_name = train_params.model.save_as or train_params.model.model_name
+    model_name = f"{model_name}_{train_params.expname}"
     model_fit_predict.serialize_pipline(pipe, model_name)
 
     return model_name, metrics, pipe
