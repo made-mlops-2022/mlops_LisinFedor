@@ -3,9 +3,10 @@ import pickle
 import numpy as np
 import pandas as pd
 import mlflow
+from mlflow.entities import FileInfo
 
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 
@@ -16,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 def train_model(
-    feats: pd.DataFrame, target: pd.Series, train_params: model_params.ModelParams
+    feats: pd.DataFrame,
+    target: pd.Series,
+    train_params: model_params.ModelParams,
 ) -> Any:
     """Import model class, init model and train.
 
@@ -100,7 +103,7 @@ def get_mlflow_model_runs_path(model_name: str, run_id: str):
 def get_model_mlflow_path_by_id(uri: str, model_id: str) -> Tuple[str, bool]:
     mlflow.tracking.set_tracking_uri(uri)
     client = mlflow.tracking.MlflowClient(uri)
-    client_info = client.list_artifacts(model_id)
+    client_info: List[FileInfo] = client.list_artifacts(model_id)
 
     for file_info in client_info:
         if ".yml" in file_info.path:
@@ -120,3 +123,5 @@ def get_model_mlflow_path_by_id(uri: str, model_id: str) -> Tuple[str, bool]:
             ),
             False,
         )
+
+    raise mlflow.exceptions.MlflowException(f"No artifacts in run {model_id}")
