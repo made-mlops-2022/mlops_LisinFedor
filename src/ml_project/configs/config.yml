@@ -1,0 +1,28 @@
+data_path: src/ml_project/assets/raw/heart_cleveland_upload.csv
+expname: experiment
+features:
+  categorical_features_max_uniqs: 5
+  create_dummy: true
+  features_to_drop: null
+  numeric_features_min_uniqs: 5
+  scaler: MinMaxScaler
+  target_col: condition
+  use_scaler: false
+mlflow_exp: mlops
+mlflow_url: null
+model:
+  save_as: null
+  kwargs_path: null
+  last_model: runs:/5bc0d340c40444fa95ed74ec2a9d82ac/GradientBoostingClassifier_experiment11
+  model_name: GradientBoostingClassifier
+  module: sklearn
+  submodule: ensemble
+s3:
+  bucket: dvcstorage
+  defaultfile: heart_cleveland_upload.csv
+  defaultout: src/ml_project/assets/raw
+  path: untracked
+splitting:
+  random_state: 42
+  val_size: 0.3
+use_mlflow: true
