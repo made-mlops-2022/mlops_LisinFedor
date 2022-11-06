@@ -18,7 +18,8 @@ class ModelParams:
     module: str = field(default="sklearn")
     submodule: Optional[str] = field(default="ensemble")
     model_name: str = field(default="RandomForestClassifier")
-    kwargs_path: Optional[str] = field(default="")
+    kwargs_path: Optional[str] = field(default=None)
+    save_as: Optional[str] = field(default=None)
 
 
 def create_clear_model(params: ModelParams) -> Any:
@@ -47,7 +48,8 @@ def init_model(model_class: Any, params: ModelParams) -> Any:
 
     logger.warning("kwargs_path is null. Use default params.")
     logger.warning("See default params in model_configs.")
-    def_kwargs = get_default_kwargs(model_class, params.model_name)
+    model_name = params.save_as or params.model_name
+    def_kwargs = get_default_kwargs(model_class, model_name)
     return model_class(**def_kwargs)
 
 
@@ -68,7 +70,7 @@ def get_default_kwargs(func: Callable, model_name: str):
             return yaml.safe_load(kwargs_file)
 
     logger.warning(
-        f"Can't find default model kwargs file {file_name} in configs."
+        f"Can't find default model kwargs file {file_name} in configs.",
     )
     signature = inspect.signature(func)
     def_kwargs = {
