@@ -35,7 +35,7 @@ def create_clear_model(params: ModelParams) -> Any:
         model_path = params.module
     else:
         model_path = ".".join([params.module, params.submodule])
-    
+
     module = importlib.import_module(model_path)
     return getattr(module, params.model_name)
 
@@ -82,4 +82,3 @@ def get_default_kwargs(func: Callable, model_name: str):
     save_def_kwargs(def_kwargs, file_path)
 
     return def_kwargs
-
