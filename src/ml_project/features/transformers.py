@@ -28,7 +28,7 @@ class CatTransformer(BaseEstimator, TransformerMixin):
             max_cat_num (int): max number of unique elements.
         """
         logger.info(
-            "Feature is categorical if number of unique vals is %d.",  # noqa: WPS323
+            "Feature is categorical if number of unique vals less then %d.",  # noqa: WPS323
             max_cat_num,
         )
         self.max_cat_num = max_cat_num
