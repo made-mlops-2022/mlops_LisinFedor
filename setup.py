@@ -53,8 +53,9 @@ setuptools.setup(
         ],
     },
     entry_points={
-        'console_scripts': [
-            'classification = ml_project.__main__:main',
+        "console_scripts": [
+            "classification = ml_project.__main__:main",
+            "app = online_inference.__main__:main",
         ],
     },
 )
