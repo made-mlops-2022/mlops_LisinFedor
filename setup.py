@@ -34,6 +34,8 @@ setuptools.setup(
         "dvc[s3]",
         "marshmallow_dataclass",
         "mlflow",
+        "fastapi",
+        "uvicorn",
     ],
     extras_require={
         "dev": [
