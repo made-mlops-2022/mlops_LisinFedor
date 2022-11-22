@@ -37,6 +37,8 @@ class CatTransformer(BaseEstimator, TransformerMixin):
         self._cat_feat_id: List[int] = []
         self._enc_num_id: Optional[int] = None
         self._ohe: Optional[ColumnTransformer] = None
+        self._pd_feats: Optional[List[str]] = None
+        self._np_feats_count: Optional[int] = None
         super().__init__()
 
     def fit(self, x_data: DataT, *args) -> CatTransformer:
@@ -50,10 +52,12 @@ class CatTransformer(BaseEstimator, TransformerMixin):
             CatTransformer: fitted transformer.
         """
         if isinstance(x_data, pd.DataFrame):
+            self._pd_feats = x_data.columns.to_list()
             self._find_in_pd(x_data)
             transformed_x = self._transform_pd(x_data)
             self._enc_feat_names = transformed_x.columns.to_list()
         elif isinstance(x_data, np.ndarray):
+            self._np_feats_count = x_data.shape[1]
             self._find_in_np(x_data)
             self._ohe = self._create_np_trans()
             self._enc_num_id = self._ohe.fit_transform(x_data).shape[1]
@@ -62,16 +66,17 @@ class CatTransformer(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, x_data: DataT, *args):
-        if isinstance(x_data, pd.DataFrame):
-            trans_data = self._transform_pd(x_data)
+        formated_data = self._format_data(x_data)
+        if isinstance(formated_data, pd.DataFrame):
+            trans_data = self._transform_pd(formated_data)
             return self._check_transformation(trans_data)
-        elif isinstance(x_data, np.ndarray):
-            trans_data = self._transform_np(x_data)
+        elif isinstance(formated_data, np.ndarray):
+            trans_data = self._transform_np(formated_data)
             return self._check_transformation(trans_data)
 
         raise TypeError(
             "`x_data` can be pandas DataFrame or Numpy, not {tp}".format(
-                tp=type(x_data),
+                tp=type(formated_data),
             ),
         )
 
@@ -83,6 +88,17 @@ class CatTransformer(BaseEstimator, TransformerMixin):
                 raise AttributeError("You need to fit transformer first.")
             return self._cat_feat_id
         return self._cat_feat_names
+
+    def _format_data(self, x_data: DataT):
+        """Change data type pandas <-> numpy"""
+        if isinstance(x_data, pd.DataFrame):
+            if self._pd_feats is not None:
+                return x_data
+            return x_data.to_numpy()
+        if isinstance(x_data, np.ndarray):
+            if self._np_feats_count is not None:
+                return x_data
+            return pd.DataFrame(x_data, columns=self._pd_feats)
 
     def _find_in_pd(self, x_data: pd.DataFrame):
         for col_name in x_data.columns:
@@ -168,32 +184,43 @@ class ScalerTransformer(BaseEstimator, TransformerMixin):
         super().__init__()
 
     def fit(self, x_data: DataT, *args) -> ScalerTransformer:
-        self._find_numeric(x_data)
+        fit_data = x_data.copy()
+        if isinstance(x_data, pd.DataFrame):
+            fit_data = x_data.to_numpy()
+        self._find_numeric(fit_data)
         self._transformer = ColumnTransformer(
             transformers=[
                 ("scaler", self.scaler, self._cols),
             ],
         )
-        self._transformer.fit(x_data)
+        self._transformer.fit(fit_data)
 
         return self
 
     def transform(self, x_data: DataT, *args) -> DataT:
-        if self._transformer is None:
-            raise AttributeError("You need to fit transformer first.")
-        scaled_cols = self._transformer.transform(x_data)
-        if isinstance(x_data, pd.DataFrame):
-            x_data[self._cols] = scaled_cols
-        elif isinstance(x_data, np.ndarray):
-            x_data = x_data.astype("float")
-            x_data[:, self._cols] = scaled_cols
+        cols_names = None
+        if isinstance(x_data, np.ndarray):
+            tr_data = x_data.copy()
+        elif isinstance(x_data, pd.DataFrame):
+            tr_data = x_data.to_numpy()
+            cols_names = x_data.columns
         else:
             raise TypeError(
                 "`x_data` can be pandas DataFrame or Numpy, not {tp}".format(
                     tp=type(x_data),
                 ),
             )
-        return x_data
+
+        if self._transformer is None:
+            raise AttributeError("You need to fit transformer first.")
+        scaled_cols = self._transformer.transform(tr_data)
+        tr_data = tr_data.astype("float")
+        tr_data[:, self._cols] = scaled_cols
+
+        if cols_names is not None:
+            return pd.DataFrame(tr_data, columns=cols_names)
+
+        return tr_data
 
     def _find_numeric(self, df: DataT):
         if isinstance(df, pd.DataFrame):
