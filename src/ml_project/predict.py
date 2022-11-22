@@ -7,7 +7,7 @@ from typing import Any, Optional, Union
 from ml_project.enities import train_params
 from ml_project.data.make_dataset import read_data
 from ml_project.models import model_fit_predict
-from ml_project.project_paths import CONFIG_PATH, RAW_DATA_PATH
+from ml_project.project_paths import CONFIG_PATH, INTERIM_DATA_PATH
 
 
 logger = logging.getLogger(__name__)
@@ -90,9 +90,9 @@ def load_last_model(config_params: train_params.TrainigParams):
 
 
 if __name__ == "__main__":
-    path = RAW_DATA_PATH / "heart_cleveland_upload.csv"
+    path = INTERIM_DATA_PATH / "test.csv"
     load_and_predict(
         data_path=path,
         out_csv_file_path="preds.csv",
-        model_id="5bc0d340c40444fa95ed74ec2a9d82ac",
+        model_id="c6985d0261c947c5ad84682a73802de5",
     )
