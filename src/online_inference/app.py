@@ -1,4 +1,3 @@
-import os
 from typing import List
 from fastapi import FastAPI, Depends, Body, status
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -48,7 +47,7 @@ async def many_matrix(
     return make_prediction(model, patients_list)
 
 
-@app.post("/health")
+@app.get("/health")
 async def health_check(model=Depends(get_model)):
     try:
         pat = Patient(*[66, 0, 3, 178, 228, 1, 0, 165, 1, 1.0, 1, 2, 2])
