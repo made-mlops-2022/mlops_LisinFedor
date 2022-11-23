@@ -136,7 +136,6 @@ class CatTransformer(BaseEstimator, TransformerMixin):
         return pd.get_dummies(
             x_data,
             columns=self._cat_feat_names,
-            drop_first=True,
         )
 
     def _transform_np(self, x_data: np.ndarray) -> np.ndarray:
