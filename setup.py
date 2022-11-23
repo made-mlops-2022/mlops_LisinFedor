@@ -50,6 +50,7 @@ setuptools.setup(
             "sdv",
             "pytest",
             "pytest-dotenv",
+            "httpx",
         ],
     },
     entry_points={
