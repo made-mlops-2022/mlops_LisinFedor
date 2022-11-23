@@ -1,11 +1,23 @@
 import argparse
 import uvicorn
+from logging import getLogger
 
+from online_inference.testing_router import testing_router
 from online_inference.app import app
+
+
+logger = getLogger(__name__)
 
 
 def main():
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--testmode",
+        action="store_true",
+        help="Launch server in test mode, some new request may appear.",
+    )
+
     parser.add_argument(
         "--host",
         required=False,
@@ -20,6 +32,10 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.testmode:
+        logger.warning("App launched in testing mode.")
+        app.include_router(testing_router)
 
     uvicorn.run(
         app,  # type: ignore
