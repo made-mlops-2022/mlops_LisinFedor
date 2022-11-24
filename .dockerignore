@@ -1,0 +1,26 @@
+# cache
+**/*.egg-info
+**/__pycache__
+**/.mypy_cache
+**/.pytest_cache
+**/.python-version
+
+# vscode
+**/.vscode
+
+# env
+.env
+dvc.*
+.dvc*
+
+# git
+**/.github
+**/.gitignore
+
+# usless project folders
+notebooks
+scripts
+test
+venv
+**/assets
+**/trained
