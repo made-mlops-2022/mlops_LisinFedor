@@ -31,16 +31,28 @@ setuptools.setup(
         "numpy",
         "scikit-learn",
         "pandas",
+        "dvc[s3]",
+        "marshmallow_dataclass",
+        "mlflow",
     ],
     extras_require={
         "dev": [
             "wemake-python-styleguide",
             "mypy",
             "black",
+            "jupyterlab",
+            "seaborn",
+            "types-PyYAML",
         ],
         "tests": [
+            "sdv",
             "pytest",
             "pytest-dotenv",
+        ],
+    },
+    entry_points={
+        'console_scripts': [
+            'classification = ml_project.__main__:main',
         ],
     },
 )

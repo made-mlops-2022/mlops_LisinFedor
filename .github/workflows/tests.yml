@@ -1,0 +1,21 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  flake8-lint:
+    runs-on: python:3.9.6-slim
+    name: Lint
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+      
+      - name: Install linter dependencies and package
+        run: pip install .[tests]
+
+      - name: Run tests
+        env:
+          MLFLOW_URI: ${{ secrets.MLFLOW_URI }}
+        run: |
+          echo "MLFLOW_URI=${MLFLOW_URI}" >> .env
+          pytest .

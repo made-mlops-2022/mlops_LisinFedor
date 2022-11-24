@@ -1,0 +1,21 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: classification --train --no-mlflow --modelname last
+    deps:
+    - path: src/ml_project/assets/raw/heart_cleveland_upload.csv
+      md5: 9f536dad38229ca519687b116f1d632a
+      size: 11106
+    - path: src/ml_project/configs/config.yml
+      md5: 1fcae3f59809ae8d0468e44c62e12bf2
+      size: 715
+    outs:
+    - path: src/ml_project/assets/interim/test.csv
+      md5: 5f7408728e71bc45e30ede8a5fde7b51
+      size: 3221
+    - path: src/ml_project/assets/interim/test_target.csv
+      md5: d40f0a275384ea430201e31b92796956
+      size: 190
+    - path: src/ml_project/models/trained/last_metrics.json
+      md5: c22d74070a8150bfe4d4219385cb53c0
+      size: 680

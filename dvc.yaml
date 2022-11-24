@@ -1,0 +1,11 @@
+stages:
+  train:
+    cmd: classification --train --no-mlflow --modelname last
+    deps:
+      - src/ml_project/configs/config.yml
+      - src/ml_project/assets/raw/heart_cleveland_upload.csv
+    outs:
+      - src/ml_project/assets/interim/test.csv
+      - src/ml_project/assets/interim/test_target.csv
+    metrics:
+      - src/ml_project/models/trained/last_metrics.json
