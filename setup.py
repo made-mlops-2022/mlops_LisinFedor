@@ -36,6 +36,7 @@ setuptools.setup(
         "mlflow",
         "fastapi",
         "uvicorn",
+        "python-dotenv",
     ],
     extras_require={
         "dev": [
