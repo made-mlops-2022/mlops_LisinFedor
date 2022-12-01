@@ -30,7 +30,6 @@ setuptools.setup(
         "pandas",
         "numpy",
         "scikit-learn",
-        "pandas",
         "dvc[s3]",
         "marshmallow_dataclass",
         "mlflow",
@@ -40,6 +39,9 @@ setuptools.setup(
     ],
     extras_require={
         "dev": [
+            "apache-airflow>=2.4.0",
+            "apache-airflow-providers-docker==3.2.0",
+            "apache-airflow-providers-amazon==2.4.0",
             "wemake-python-styleguide",
             "mypy",
             "black",
