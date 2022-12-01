@@ -28,8 +28,8 @@ default_args = {
 with DAG(
     dag_id="weekly_model_checkup",
     catchup=False,
-    start_date=airflow.utils.dates.days_ago(2),
-    schedule_interval="30 00 * * 0",
+    start_date=airflow.utils.dates.days_ago(1),
+    schedule_interval="30 00 * * 2",
     default_args=default_args,
 ) as dag:
 
