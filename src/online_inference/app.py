@@ -58,3 +58,8 @@ async def health_check(model=Depends(get_model)):
             content=jsonable_encoder({"detail": ex}),
         )
     return {"response": "OK"}
+
+
+@app.get("/health_kube")
+async def health_check_kube():
+    return {"response": "OK"}
