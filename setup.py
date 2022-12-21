@@ -34,6 +34,9 @@ setuptools.setup(
         "dvc[s3]",
         "marshmallow_dataclass",
         "mlflow",
+        "fastapi",
+        "uvicorn",
+        "python-dotenv",
     ],
     extras_require={
         "dev": [
@@ -48,11 +51,13 @@ setuptools.setup(
             "sdv",
             "pytest",
             "pytest-dotenv",
+            "httpx",
         ],
     },
     entry_points={
-        'console_scripts': [
-            'classification = ml_project.__main__:main',
+        "console_scripts": [
+            "classification = ml_project.__main__:main",
+            "app = online_inference.__main__:main",
         ],
     },
 )
