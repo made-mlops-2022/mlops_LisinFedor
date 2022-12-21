@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-config
+  namespace: default
+
+data:
+  MODEL_NAME: FinLogReg
+  MODEL_STAGE: Production
+  MODEL_VERSION: "3"
