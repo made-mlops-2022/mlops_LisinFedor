@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fastapi-ml
+
+spec:
+  containers:
+    - name: fastapi-ml
+      image: theolisin/mlops_kube:1.0.0
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 5555
+          name: http
+          protocol: TCP
+      env:
+        - name: MODEL_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: MODEL_NAME
+        - name: MODEL_STAGE
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: MODEL_STAGE
+        - name: MODEL_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: ml-config
+              key: MODEL_VERSION
+        - name: MLFLOW_URI
+          valueFrom:
+            secretKeyRef:
+              name: ml-secret
+              key: MLFLOW_URI
+              optional: false
